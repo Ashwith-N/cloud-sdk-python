@@ -25,17 +25,17 @@ _ENV_FILE = Path(__file__).parent.parent.parent.parent.parent.parent / ".env_int
 
 
 def _resolve_auth() -> AuthProvider | None:
-    if token := os.getenv("CONSENT_BEARER_TOKEN"):
+    if token := os.getenv("DPI_NG_CONSENT_BEARER_TOKEN"):
         return BearerTokenAuth(token)
-    token_url     = os.getenv("CONSENT_TOKEN_URL")
-    client_id     = os.getenv("CONSENT_CLIENT_ID")
-    client_secret = os.getenv("CONSENT_CLIENT_SECRET")
+    token_url     = os.getenv("DPI_NG_CONSENT_TOKEN_URL")
+    client_id     = os.getenv("DPI_NG_CONSENT_CLIENT_ID")
+    client_secret = os.getenv("DPI_NG_CONSENT_CLIENT_SECRET")
     if token_url and client_id and client_secret:
         return ClientCredentialsAuth(token_url=token_url, client_id=client_id, client_secret=client_secret)
-    cert_file = os.getenv("CONSENT_CERT_FILE")
-    key_file  = os.getenv("CONSENT_KEY_FILE")
+    cert_file = os.getenv("DPI_NG_CONSENT_CERT_FILE")
+    key_file  = os.getenv("DPI_NG_CONSENT_KEY_FILE")
     if cert_file and key_file:
-        return ClientCertificateAuth(cert_file=cert_file, key_file=key_file, ca_file=os.getenv("CONSENT_CA_FILE"))
+        return ClientCertificateAuth(cert_file=cert_file, key_file=key_file, ca_file=os.getenv("DPI_NG_CONSENT_CA_FILE"))
     return None
 
 
@@ -53,10 +53,10 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
 def live_client() -> Iterator[ConsentClient]:
     if _ENV_FILE.exists():
         load_dotenv(_ENV_FILE, override=True)
-    base_url = os.getenv("CONSENT_BASE_URL", "")
+    base_url = os.getenv("DPI_NG_CONSENT_BASE_URL", "")
     auth = _resolve_auth()
     if not base_url or auth is None:
-        pytest.skip("No integration credentials in .env — set CONSENT_BASE_URL plus one auth flow")
+        pytest.skip("No integration credentials in .env — set DPI_NG_CONSENT_BASE_URL plus one auth flow")
     with create_client(base_url=base_url, auth=auth) as client:
         yield client
 

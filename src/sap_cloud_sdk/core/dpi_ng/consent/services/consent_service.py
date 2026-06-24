@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from sap_cloud_sdk.core.telemetry import Module, Operation, record_metrics
+
 from ..client import _ODataClient
 from ..dtos.consent import (
     CheckConsentExistsResult,
@@ -21,15 +23,22 @@ _SVC = "consentServices"
 class ConsentService:
     """Client for consentServices - consent creation, withdrawal, and reads."""
 
-    def __init__(self, client: _ODataClient) -> None:
+    def __init__(
+        self,
+        client: _ODataClient,
+        *,
+        _telemetry_source: Module | None = None,
+    ) -> None:
         """Bind entity classes from the consentServices endpoint."""
         logger.info("Invoked ConsentService.__init__")
         self._client = client
+        self._telemetry_source = _telemetry_source
         (self.Consent,) = client.get_entity_classes(_SVC)
         logger.info("Exiting ConsentService.__init__")
 
     # ------ consents ------
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_LIST_CONSENTS)
     def list_consents(self, **query: Any) -> list[Any]:
         """Return all consents, optionally filtered/paged via OData query kwargs."""
         logger.info("Invoked ConsentService.list_consents")
@@ -37,6 +46,7 @@ class ConsentService:
         logger.info("Exiting ConsentService.list_consents")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_GET_CONSENT)
     def get_consent(self, consent_id: str) -> Any:
         """Return a single Consent entity by its UUID."""
         logger.info("Invoked ConsentService.get_consent")
@@ -44,6 +54,7 @@ class ConsentService:
         logger.info("Exiting ConsentService.get_consent")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_DELETE_CONSENT)
     def delete_consent(self, consent_id: str) -> None:
         """Delete a Consent entity by its UUID."""
         logger.info("Invoked ConsentService.delete_consent")
@@ -53,6 +64,7 @@ class ConsentService:
 
     # ------ actions ------
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_CREATE_CONSENT_FROM_TEMPLATE)
     def create_consent_from_template(self, request: CreateConsentRequest) -> list[Any]:
         """Invoke createConsentFromTemplate and return the resulting Consent entities."""
         logger.info("Invoked ConsentService.create_consent_from_template")
@@ -71,6 +83,7 @@ class ConsentService:
         logger.info("Exiting ConsentService.create_consent_from_template")
         return entities
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_WITHDRAW_CONSENT)
     def withdraw_consent(
         self, request: WithdrawConsentRequest
     ) -> dict[str, Any] | None:
@@ -80,6 +93,7 @@ class ConsentService:
         logger.info("Exiting ConsentService.withdraw_consent")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_TERMINATE_CONSENT)
     def terminate_consent(
         self, request: WithdrawConsentRequest
     ) -> dict[str, Any] | None:
@@ -89,6 +103,7 @@ class ConsentService:
         logger.info("Exiting ConsentService.terminate_consent")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_CHECK_CONSENT_EXISTS)
     def check_consent_exists(
         self, data_subject_id: str, template_id: str
     ) -> CheckConsentExistsResult:

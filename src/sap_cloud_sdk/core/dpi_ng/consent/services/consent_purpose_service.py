@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from sap_cloud_sdk.core.telemetry import Module, Operation, record_metrics
+
 from ..client import _ODataClient
 from ._query import _apply_query
 
@@ -16,10 +18,16 @@ _SVC = "consentPurposeExternalServices"
 class ConsentPurposeService:
     """Client for consentPurposeExternalServices - CRUD on purposes and their texts."""
 
-    def __init__(self, client: _ODataClient) -> None:
+    def __init__(
+        self,
+        client: _ODataClient,
+        *,
+        _telemetry_source: Module | None = None,
+    ) -> None:
         """Bind entity classes from the consentPurposeExternalServices endpoint."""
         logger.info("Invoked ConsentPurposeService.__init__")
         self._client = client
+        self._telemetry_source = _telemetry_source
         (
             self.ConsentPurpose,
             self.ConsentPurposeText,
@@ -28,6 +36,7 @@ class ConsentPurposeService:
 
     # ------ consentPurposes ------
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_LIST_PURPOSES)
     def list_purposes(self, **query: Any) -> list[Any]:
         """Return all consent purposes, optionally filtered/paged via OData query kwargs."""
         logger.info("Invoked ConsentPurposeService.list_purposes")
@@ -37,6 +46,7 @@ class ConsentPurposeService:
         logger.info("Exiting ConsentPurposeService.list_purposes")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_GET_PURPOSE)
     def get_purpose(self, purpose_id: str) -> Any:
         """Return a single ConsentPurpose entity by its UUID."""
         logger.info("Invoked ConsentPurposeService.get_purpose")
@@ -44,6 +54,7 @@ class ConsentPurposeService:
         logger.info("Exiting ConsentPurposeService.get_purpose")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_CREATE_PURPOSE)
     def create_purpose(self, body: dict[str, Any]) -> Any:
         """Create a new ConsentPurpose entity and return it."""
         logger.info("Invoked ConsentPurposeService.create_purpose")
@@ -54,6 +65,7 @@ class ConsentPurposeService:
         logger.info("Exiting ConsentPurposeService.create_purpose")
         return entity
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_UPDATE_PURPOSE)
     def update_purpose(self, purpose_id: str, body: dict[str, Any]) -> Any:
         """Fetch a ConsentPurpose by ID, apply field updates, and PATCH it."""
         logger.info("Invoked ConsentPurposeService.update_purpose")
@@ -64,6 +76,7 @@ class ConsentPurposeService:
         logger.info("Exiting ConsentPurposeService.update_purpose")
         return entity
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_DELETE_PURPOSE)
     def delete_purpose(self, purpose_id: str) -> None:
         """Delete a ConsentPurpose by its UUID."""
         logger.info("Invoked ConsentPurposeService.delete_purpose")
@@ -73,6 +86,7 @@ class ConsentPurposeService:
 
     # ------ lifecycle actions ------
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_SET_PURPOSE_ACTIVE)
     def set_purpose_active(self, purpose_id: str) -> Any:
         """Activate a consent purpose and return the refreshed entity."""
         logger.info("Invoked ConsentPurposeService.set_purpose_active")
@@ -83,6 +97,7 @@ class ConsentPurposeService:
         logger.info("Exiting ConsentPurposeService.set_purpose_active")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_SET_PURPOSE_INACTIVE)
     def set_purpose_inactive(self, purpose_id: str) -> Any:
         """Deactivate a consent purpose and return the refreshed entity."""
         logger.info("Invoked ConsentPurposeService.set_purpose_inactive")
@@ -95,6 +110,7 @@ class ConsentPurposeService:
 
     # ------ consentPurposeTexts ------
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_LIST_PURPOSE_TEXTS)
     def list_purpose_texts(self, **query: Any) -> list[Any]:
         """Return all purpose text records, optionally filtered/paged."""
         logger.info("Invoked ConsentPurposeService.list_purpose_texts")
@@ -104,6 +120,7 @@ class ConsentPurposeService:
         logger.info("Exiting ConsentPurposeService.list_purpose_texts")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_GET_PURPOSE_TEXT)
     def get_purpose_text(
         self, purpose_id: str, type_code: str, language_code: str
     ) -> Any:
@@ -115,6 +132,7 @@ class ConsentPurposeService:
         logger.info("Exiting ConsentPurposeService.get_purpose_text")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_CREATE_PURPOSE_TEXT)
     def create_purpose_text(self, body: dict[str, Any]) -> Any:
         """Create a new ConsentPurposeText entity and return it."""
         logger.info("Invoked ConsentPurposeService.create_purpose_text")
@@ -125,6 +143,7 @@ class ConsentPurposeService:
         logger.info("Exiting ConsentPurposeService.create_purpose_text")
         return entity
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_UPDATE_PURPOSE_TEXT)
     def update_purpose_text(
         self, purpose_id: str, type_code: str, language_code: str, body: dict[str, Any]
     ) -> Any:
@@ -139,6 +158,7 @@ class ConsentPurposeService:
         logger.info("Exiting ConsentPurposeService.update_purpose_text")
         return entity
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_DELETE_PURPOSE_TEXT)
     def delete_purpose_text(
         self, purpose_id: str, type_code: str, language_code: str
     ) -> None:

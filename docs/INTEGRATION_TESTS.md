@@ -144,7 +144,7 @@ For DPI NG Consent integration tests, configure the following variables in `.env
 
 ```bash
 # DPI NG Consent Configuration
-DPI_NG_CONSENT_BASE_URL=https://your-consent-service-host
+CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_BASE_URL=https://your-consent-service-host
 ```
 
 Authentication is configurable via one of three methods:
@@ -152,26 +152,26 @@ Authentication is configurable via one of three methods:
 **Option A — Static Bearer Token**
 
 ```bash
-DPI_NG_CONSENT_BEARER_TOKEN=your-bearer-token-here
+CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_BEARER_TOKEN=your-bearer-token-here
 ```
 
 **Option B — OAuth 2.0 Client Credentials**
 
 ```bash
-DPI_NG_CONSENT_TOKEN_URL=https://your-auth-host/oauth/token
-DPI_NG_CONSENT_CLIENT_ID=your-client-id
-DPI_NG_CONSENT_CLIENT_SECRET=your-client-secret
+CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_TOKEN_URL=https://your-auth-host/oauth/token
+CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_CLIENT_ID=your-client-id
+CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_CLIENT_SECRET=your-client-secret
 ```
 
 **Option C — Mutual TLS (mTLS)**
 
 ```bash
-DPI_NG_CONSENT_CERT_FILE=/path/to/client.crt
-DPI_NG_CONSENT_KEY_FILE=/path/to/client.key
-DPI_NG_CONSENT_CA_FILE=/path/to/ca.crt   # optional
+CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_CERT_FILE=/path/to/client.crt
+CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_KEY_FILE=/path/to/client.key
+CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_CA_FILE=/path/to/ca.crt   # optional
 ```
 
-Tests are skipped automatically when `DPI_NG_CONSENT_BASE_URL` or all auth variables are missing.
+Tests are skipped automatically when `CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_BASE_URL` or all auth variables are missing.
 
 ### ObjectStore Integration Tests
 

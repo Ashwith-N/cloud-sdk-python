@@ -15,6 +15,8 @@ Entity objects returned by service methods are python-odata entity instances.
 Access fields as attributes: ``entity.purpose_name``, ``entity.consent_id``, etc.
 """
 
+from sap_cloud_sdk.core.telemetry import Module, Operation, record_metrics
+
 from .auth import (
     AuthProvider,
     BearerTokenAuth,
@@ -58,17 +60,31 @@ class ConsentClient:
     - ``client.configuration``  - reference data CRUD (consentConfigurationExternalServices)
     """
 
-    def __init__(self, config: ConsentSDKConfig) -> None:
+    def __init__(
+        self,
+        config: ConsentSDKConfig,
+        *,
+        _telemetry_source: Module | None = None,
+    ) -> None:
         """Initialise all service clients from the given config."""
         from .client import _ODataClient
 
+        self._telemetry_source = _telemetry_source
         self._odata = _ODataClient(config)
-        self.consents: ConsentService = ConsentService(self._odata)
-        self.purposes: ConsentPurposeService = ConsentPurposeService(self._odata)
-        self.templates: ConsentTemplateService = ConsentTemplateService(self._odata)
-        self.retention: ConsentRetentionService = ConsentRetentionService(self._odata)
+        self.consents: ConsentService = ConsentService(
+            self._odata, _telemetry_source=_telemetry_source
+        )
+        self.purposes: ConsentPurposeService = ConsentPurposeService(
+            self._odata, _telemetry_source=_telemetry_source
+        )
+        self.templates: ConsentTemplateService = ConsentTemplateService(
+            self._odata, _telemetry_source=_telemetry_source
+        )
+        self.retention: ConsentRetentionService = ConsentRetentionService(
+            self._odata, _telemetry_source=_telemetry_source
+        )
         self.configuration: ConsentConfigurationService = ConsentConfigurationService(
-            self._odata
+            self._odata, _telemetry_source=_telemetry_source
         )
 
     def close(self) -> None:
@@ -84,6 +100,7 @@ class ConsentClient:
         self.close()
 
 
+@record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_CREATE_CLIENT)
 def create_client(
     config: ConsentSDKConfig | None = None,
     *,
@@ -91,6 +108,7 @@ def create_client(
     auth: AuthProvider | None = None,
     timeout: float = 30.0,
     verify_ssl: bool = True,
+    _telemetry_source: Module | None = None,
 ) -> ConsentClient:
     """Instantiate a ConsentClient from a config object or individual keyword arguments.
 
@@ -116,7 +134,7 @@ def create_client(
                 timeout=timeout,
                 verify_ssl=verify_ssl,
             )
-        return ConsentClient(config)
+        return ConsentClient(config, _telemetry_source=_telemetry_source)
     except (ValueError, TypeError) as exc:
         raise ClientCreationError(str(exc)) from exc
 

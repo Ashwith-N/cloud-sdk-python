@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from sap_cloud_sdk.core.telemetry import Module, Operation, record_metrics
+
 from ..client import _ODataClient
 from ._query import _apply_query
 
@@ -16,15 +18,22 @@ _SVC = "consentRetentionExternalServices"
 class ConsentRetentionService:
     """Client for consentRetentionExternalServices - CRUD on data retention rules."""
 
-    def __init__(self, client: _ODataClient) -> None:
+    def __init__(
+        self,
+        client: _ODataClient,
+        *,
+        _telemetry_source: Module | None = None,
+    ) -> None:
         """Bind entity classes from the consentRetentionExternalServices endpoint."""
         logger.info("Invoked ConsentRetentionService.__init__")
         self._client = client
+        self._telemetry_source = _telemetry_source
         (self.ConsentRetentionRule,) = client.get_entity_classes(_SVC)
         logger.info("Exiting ConsentRetentionService.__init__")
 
     # ------ consentRetentionRules ------
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_LIST_RULES)
     def list_rules(self, **query: Any) -> list[Any]:
         """Return all retention rules, optionally filtered/paged via OData query kwargs."""
         logger.info("Invoked ConsentRetentionService.list_rules")
@@ -34,6 +43,7 @@ class ConsentRetentionService:
         logger.info("Exiting ConsentRetentionService.list_rules")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_GET_RULE)
     def get_rule(self, rule_id: str) -> Any:
         """Return a single ConsentRetentionRule entity by its UUID."""
         logger.info("Invoked ConsentRetentionService.get_rule")
@@ -41,6 +51,7 @@ class ConsentRetentionService:
         logger.info("Exiting ConsentRetentionService.get_rule")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_CREATE_RULE)
     def create_rule(self, body: dict[str, Any]) -> Any:
         """Create a new ConsentRetentionRule entity and return it."""
         logger.info("Invoked ConsentRetentionService.create_rule")
@@ -51,6 +62,7 @@ class ConsentRetentionService:
         logger.info("Exiting ConsentRetentionService.create_rule")
         return entity
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_UPDATE_RULE)
     def update_rule(self, rule_id: str, body: dict[str, Any]) -> Any:
         """Fetch a ConsentRetentionRule by ID, apply field updates, and PATCH it."""
         logger.info("Invoked ConsentRetentionService.update_rule")
@@ -61,6 +73,7 @@ class ConsentRetentionService:
         logger.info("Exiting ConsentRetentionService.update_rule")
         return entity
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_DELETE_RULE)
     def delete_rule(self, rule_id: str) -> None:
         """Delete a ConsentRetentionRule by its UUID."""
         logger.info("Invoked ConsentRetentionService.delete_rule")
@@ -70,6 +83,7 @@ class ConsentRetentionService:
 
     # ------ lifecycle actions ------
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_SET_RULE_ACTIVE)
     def set_rule_active(self, rule_id: str) -> Any:
         """Activate a retention rule and return the refreshed entity."""
         logger.info("Invoked ConsentRetentionService.set_rule_active")
@@ -80,6 +94,7 @@ class ConsentRetentionService:
         logger.info("Exiting ConsentRetentionService.set_rule_active")
         return result
 
+    @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_SET_RULE_INACTIVE)
     def set_rule_inactive(self, rule_id: str) -> Any:
         """Deactivate a retention rule and return the refreshed entity."""
         logger.info("Invoked ConsentRetentionService.set_rule_inactive")

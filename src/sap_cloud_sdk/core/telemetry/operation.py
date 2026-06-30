@@ -185,6 +185,7 @@ class Operation(str, Enum):
     AGENTGATEWAY_CALL_MCP_TOOL = "call_mcp_tool"
     AGENTGATEWAY_GET_SYSTEM_AUTH = "get_system_auth"
     AGENTGATEWAY_GET_USER_AUTH = "get_user_auth"
+    AGENTGATEWAY_LIST_AGENT_CARDS = "list_agent_cards"
 
     # DPI NG Consent Operations
     DPI_NG_CONSENT_CREATE_CLIENT = "consent_create_client"

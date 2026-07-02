@@ -70,9 +70,35 @@ with create_client(config=config) as client:
 
 ## Authentication
 
-Pass a `ClientCredentialsAuth` instance to `ConsentSDKConfig`. The provider
-performs the OAuth2 `client_credentials` flow against the given token URL and
-refreshes the token transparently 60 seconds before it expires.
+The SDK supports three authentication strategies. Pass one as the `auth`
+argument to `ConsentSDKConfig`.
+
+### BearerTokenAuth
+
+Use when you already have a valid bearer token:
+
+```python
+from sap_cloud_sdk.core.dpi_ng.consent import ConsentSDKConfig, BearerTokenAuth
+
+config = ConsentSDKConfig(
+    base_url="https://api.service.<region>.ngdpi.dpp.cloud.sap",
+    auth=BearerTokenAuth(token="<bearer-token>"),
+)
+```
+
+| Parameter | Required | Description |
+|---|---|---|
+| `token` | Yes | Bearer token sent as the `Authorization: Bearer` header on every request. |
+
+The token is sent as-is — no automatic refresh is performed. Use
+`ClientCredentialsAuth` for long-running processes where the token may expire.
+Passing an empty string raises `ValueError: token must not be empty`.
+
+### ClientCredentialsAuth
+
+Use when you have OAuth2 client credentials. The provider performs the
+`client_credentials` grant against the given token URL and refreshes the token
+transparently 60 seconds before it expires:
 
 ```python
 from sap_cloud_sdk.core.dpi_ng.consent import (
@@ -81,18 +107,60 @@ from sap_cloud_sdk.core.dpi_ng.consent import (
 )
 
 config = ConsentSDKConfig(
-    base_url="https://<your-consent-service-host>",
+    base_url="https://api.service.<region>.ngdpi.dpp.cloud.sap",
     auth=ClientCredentialsAuth(
-        token_url="https://<your-xsuaa-host>/oauth/token",
+        token_url="https://<xsuaa-host>/oauth/token",
         client_id="<client-id>",
         client_secret="<client-secret>",
     ),
 )
 ```
 
-All three fields - `token_url`, `client_id`, and `client_secret` - are required.
-Passing an empty string for any of them raises a `ValueError` during
-construction.
+| Parameter | Required | Description |
+|---|---|---|
+| `token_url` | Yes | OAuth2 token endpoint URL. |
+| `client_id` | Yes | OAuth2 client identifier. |
+| `client_secret` | Yes | OAuth2 client secret. |
+
+Passing an empty string for any field raises
+`ValueError: token_url, client_id, and client_secret are all required`.
+
+### ClientCertificateAuth and tenant_id
+
+Use when your environment requires mutual TLS (mTLS):
+
+```python
+from sap_cloud_sdk.core.dpi_ng.consent import (
+    ConsentSDKConfig,
+    ClientCertificateAuth,
+)
+
+config = ConsentSDKConfig(
+    base_url="https://api.service.<region>.ngdpi.dpp.cloud.sap",
+    auth=ClientCertificateAuth(
+        cert_file="/path/to/client.crt",
+        key_file="/path/to/client.key",
+        ca_file="/path/to/ca.crt",
+    ),
+    tenant_id="<your-tenant-id>",
+)
+```
+
+| Parameter | Required | Description |
+|---|---|---|
+| `cert_file` | Yes | Path to the PEM-encoded client certificate file. |
+| `key_file` | Yes | Path to the PEM-encoded private key file. |
+| `ca_file` | No | Path to a custom CA bundle. Omit to use the system trust store. |
+| `tenant_id` | Yes (with mTLS) | Tenant identifier sent as the `x-tenant-id` header on every request. |
+
+Passing an empty string for `cert_file` or `key_file` raises
+`ValueError: cert_file and key_file are required`.
+
+`tenant_id` is **required** with `ClientCertificateAuth`. The mTLS handshake
+does not carry a tenant claim, so the DPI service router needs it to route
+requests to the correct tenant. `tenant_id` is optional for `BearerTokenAuth`
+and `ClientCredentialsAuth` because the bearer token already encodes the tenant
+claim.
 
 ## Client structure
 

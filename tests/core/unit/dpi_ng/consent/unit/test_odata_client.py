@@ -36,6 +36,13 @@ def _make_config():
     return ConsentSDKConfig(base_url="https://consent.example.com", auth=auth)
 
 
+def _make_config_with_tenant(tenant_id: str):
+    auth = MagicMock(spec=AuthProvider)
+    return ConsentSDKConfig(
+        base_url="https://consent.example.com", auth=auth, tenant_id=tenant_id
+    )
+
+
 class TestRaiseForStatus:
     def test_200_does_not_raise(self):
         resp = _mock_response(200, json_body={}, text="ok", content=b"ok")
@@ -298,6 +305,42 @@ class TestOrmMethods:
         client = _ODataClient(config)
         client.delete_entity(entity)
         entity.__odata_service__.delete.assert_called_once_with(entity)
+
+
+@patch("sap_cloud_sdk.core.dpi_ng.consent.client.requests.Session")
+class TestTenantIdHeader:
+    def test_x_tenant_id_header_set_when_tenant_id_provided(
+        self, mock_session_cls
+    ):
+        mock_session = MagicMock()
+        mock_session_cls.return_value = mock_session
+
+        config = _make_config_with_tenant("my-tenant-id")
+        _ODataClient(config)
+
+        header_updates = [
+            c.args[0] if c.args else c.kwargs.get("arg", {})
+            for c in mock_session.headers.update.call_args_list
+        ]
+        assert any(
+            isinstance(h, dict) and h.get("x-tenant-id") == "my-tenant-id"
+            for h in header_updates
+        )
+
+    def test_x_tenant_id_header_not_set_when_tenant_id_is_none(
+        self, mock_session_cls
+    ):
+        mock_session = MagicMock()
+        mock_session_cls.return_value = mock_session
+
+        config = _make_config()
+        _ODataClient(config)
+
+        header_updates = [
+            c.args[0] if c.args else {}
+            for c in mock_session.headers.update.call_args_list
+        ]
+        assert all("x-tenant-id" not in h for h in header_updates)
 
 
 @patch("sap_cloud_sdk.core.dpi_ng.consent.client.ODataService")

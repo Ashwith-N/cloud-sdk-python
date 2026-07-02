@@ -52,6 +52,10 @@ class TestDefaults:
         cfg = ConsentSDKConfig(base_url="https://example.com", auth=valid_auth())
         assert cfg.service_path == "/sap/cp/kernel/dpi/consent/odata/v4"
 
+    def test_tenant_id_default_is_none(self):
+        cfg = ConsentSDKConfig(base_url="https://example.com", auth=valid_auth())
+        assert cfg.tenant_id is None
+
 
 class TestCustomValues:
     def test_custom_timeout_stored(self):
@@ -73,6 +77,14 @@ class TestCustomValues:
             service_path="/custom/path",
         )
         assert cfg.service_path == "/custom/path"
+
+    def test_tenant_id_stored(self):
+        cfg = ConsentSDKConfig(
+            base_url="https://example.com",
+            auth=valid_auth(),
+            tenant_id="tenant-abc-123",
+        )
+        assert cfg.tenant_id == "tenant-abc-123"
 
 
 class TestInvalidBaseUrl:

@@ -28,6 +28,10 @@ class ConsentSDKConfig:
         service_path: Base path that the DPI external service router uses to identify
                       and forward requests to the consent service. Do not override unless
                       deploying to a non-standard environment.
+        tenant_id: Optional tenant identifier sent as the ``x-tenant-id`` HTTP header
+                   on every request. Required when using ``ClientCertificateAuth`` because
+                   mTLS does not carry a tenant claim, so the service router needs it
+                   to route requests to the correct tenant.
     """
 
     base_url: str
@@ -35,6 +39,7 @@ class ConsentSDKConfig:
     timeout: float = 30.0
     verify_ssl: bool = True
     service_path: str = "/sap/cp/kernel/dpi/consent/odata/v4"
+    tenant_id: str | None = None
 
     def __post_init__(self) -> None:
         """Validate *base_url* format and *auth* type after dataclass construction.

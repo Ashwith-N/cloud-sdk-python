@@ -65,6 +65,8 @@ class _ODataClient:
                 "Content-Type": "application/json",
             }
         )
+        if config.tenant_id:
+            self._session.headers.update({"x-tenant-id": config.tenant_id})
         self._session.verify = config.verify_ssl
         config.auth.apply(self._session)
         self._services: dict[str, ODataService] = {}

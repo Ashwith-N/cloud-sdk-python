@@ -1,4 +1,4 @@
-"""OData v4 client backed by python-odata (https://pypi.org/project/python-odata/)."""
+"""OData v4 client backed by python-odata client."""
 
 from __future__ import annotations
 

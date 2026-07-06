@@ -23,7 +23,7 @@ class TestValidConstruction:
             base_url="https://consent.cfapps.eu10.hana.ondemand.com",
             auth=valid_auth(),
         )
-        assert "hana.ondemand.com" in cfg.base_url
+        assert cfg.base_url == "https://consent.cfapps.eu10.hana.ondemand.com"
 
     def test_trailing_slash_stripped(self):
         cfg = ConsentSDKConfig(base_url="https://example.com/", auth=valid_auth())

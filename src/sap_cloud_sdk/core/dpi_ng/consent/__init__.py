@@ -17,7 +17,7 @@ Access fields as attributes: ``entity.purpose_name``, ``entity.consent_id``, etc
 
 from sap_cloud_sdk.core.telemetry import Module, Operation, record_metrics
 
-from .auth import (
+from sap_cloud_sdk.core.dpi_ng.auth import (
     AuthProvider,
     BearerTokenAuth,
     ClientCertificateAuth,
@@ -30,13 +30,13 @@ from .services import (
     ConsentService,
     ConsentTemplateService,
 )
-from .config import ConsentSDKConfig
-from .exceptions import (
+from .config import ConsentConfig
+from sap_cloud_sdk.core.dpi_ng.exceptions import (
     AuthenticationError,
     AuthorizationError,
     ClientCreationError,
     ConflictError,
-    ConsentSDKError,
+    DPINGError,
     NotFoundError,
     ODataError,
     ValidationError,
@@ -62,20 +62,20 @@ class ConsentClient:
 
     def __init__(
         self,
-        config: ConsentSDKConfig,
+        config: ConsentConfig,
         *,
         _telemetry_source: Module | None = None,
     ) -> None:
         """Initialise all service clients from the given config.
 
         Args:
-            config: Validated ``ConsentSDKConfig`` containing the base URL and auth strategy.
+            config: Validated ``ConsentConfig`` containing the base URL and auth strategy.
             _telemetry_source: Internal parameter; not for end-user use.
         """
-        from .client import _ODataClient
+        from .client import _ConsentODataClient
 
         self._telemetry_source = _telemetry_source
-        self._odata = _ODataClient(config)
+        self._odata = _ConsentODataClient(config)
         self.consents: ConsentService = ConsentService(
             self._odata, _telemetry_source=_telemetry_source
         )
@@ -107,7 +107,7 @@ class ConsentClient:
 
 @record_metrics(Module.DPI_NG, Operation.DPI_NG_CONSENT_CREATE_CLIENT)
 def create_client(
-    config: ConsentSDKConfig | None = None,
+    config: ConsentConfig | None = None,
     *,
     base_url: str | None = None,
     auth: AuthProvider | None = None,
@@ -118,7 +118,7 @@ def create_client(
     """Create a ConsentClient with explicit configuration or individual keyword arguments.
 
     Args:
-        config: Pre-built ``ConsentSDKConfig``. When provided, all other kwargs
+        config: Pre-built ``ConsentConfig``. When provided, all other kwargs
             are ignored.
         base_url: URL of the DPI external service router
             (e.g. ``https://api.service.<region>.ngdpi.dpp.cloud.sap``).
@@ -147,7 +147,7 @@ def create_client(
                 raise ValueError(
                     "base_url and auth are required when config is not provided"
                 )
-            config = ConsentSDKConfig(
+            config = ConsentConfig(
                 base_url=base_url,
                 auth=auth,
                 timeout=timeout,
@@ -162,14 +162,14 @@ __all__ = [
     # factory + top-level client
     "create_client",
     "ConsentClient",
-    "ConsentSDKConfig",
+    "ConsentConfig",
     # auth strategies
     "AuthProvider",
     "BearerTokenAuth",
     "ClientCredentialsAuth",
     "ClientCertificateAuth",
     # exceptions
-    "ConsentSDKError",
+    "DPINGError",
     "ClientCreationError",
     "AuthenticationError",
     "AuthorizationError",

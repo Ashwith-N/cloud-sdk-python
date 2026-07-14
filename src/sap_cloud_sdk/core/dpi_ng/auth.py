@@ -1,4 +1,4 @@
-"""Authentication strategy implementations for the Consent SDK.
+"""Authentication strategy implementations shared across all DPI NG capabilities.
 
 Each provider implements AuthProvider.apply(), which configures the
 requests.Session passed to it to inject the chosen auth mechanism.

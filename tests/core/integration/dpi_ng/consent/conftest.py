@@ -17,6 +17,7 @@ from sap_cloud_sdk.core.dpi_ng.consent import (
     ClientCertificateAuth,
     ClientCredentialsAuth,
     ConsentClient,
+    ConsentConfig,
     create_client,
 )
 
@@ -69,7 +70,9 @@ def live_client() -> Iterator[ConsentClient]:
         pytest.skip(
             "No integration credentials in .env — set CLOUD_SDK_CFG_DPI_NG_DEFAULT_BASE_URL plus one auth flow"
         )
-    with create_client(base_url=base_url, auth=auth) as client:
+    tenant_id = os.getenv("CLOUD_SDK_CFG_DPI_NG_CONSENT_DEFAULT_TENANT_ID")
+    config = ConsentConfig(base_url=base_url, auth=auth, tenant_id=tenant_id)
+    with create_client(config=config) as client:
         yield client
 
 

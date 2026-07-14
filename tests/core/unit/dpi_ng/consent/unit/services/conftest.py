@@ -6,12 +6,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from sap_cloud_sdk.core.dpi_ng.consent.client import _ODataClient
+from sap_cloud_sdk.core.dpi_ng.consent.client import _ConsentODataClient
 
 
 def _make_mock_client(entities_module):
     svc = MagicMock()
-    c = MagicMock(spec=_ODataClient)
+    c = MagicMock(spec=_ConsentODataClient)
     c.get_entity_classes.return_value = entities_module._make_entities(svc)
     q = MagicMock()
     q.all.return_value = []

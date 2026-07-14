@@ -1,8 +1,8 @@
-"""Custom exception hierarchy for the Consent SDK."""
+"""Shared exception hierarchy for all DPI NG capabilities."""
 
 
-class ConsentSDKError(Exception):
-    """Base exception for all Consent SDK errors."""
+class DPINGError(Exception):
+    """Base exception for all DPI NG SDK errors."""
 
     def __init__(self, message: str, odata_error: dict | None = None) -> None:
         """Store the error message and optional OData error payload.
@@ -16,31 +16,31 @@ class ConsentSDKError(Exception):
         self.odata_error = odata_error or {}
 
 
-class ClientCreationError(ConsentSDKError):
+class ClientCreationError(DPINGError):
     """Raised when the SDK client fails to initialize."""
 
 
-class AuthenticationError(ConsentSDKError):
+class AuthenticationError(DPINGError):
     """Raised on HTTP 401 - credentials are missing, expired, or rejected by the service."""
 
 
-class AuthorizationError(ConsentSDKError):
+class AuthorizationError(DPINGError):
     """Raised on HTTP 403 - the caller is authenticated but lacks permission for the operation."""
 
 
-class ValidationError(ConsentSDKError):
+class ValidationError(DPINGError):
     """Raised when request input fails server-side validation."""
 
 
-class NotFoundError(ConsentSDKError):
+class NotFoundError(DPINGError):
     """Raised when the requested resource does not exist."""
 
 
-class ConflictError(ConsentSDKError):
+class ConflictError(DPINGError):
     """Raised when the operation conflicts with existing state (e.g. duplicate name)."""
 
 
-class ODataError(ConsentSDKError):
+class ODataError(DPINGError):
     """Raised for unexpected OData service error responses (any status not covered by a subclass)."""
 
     def __init__(

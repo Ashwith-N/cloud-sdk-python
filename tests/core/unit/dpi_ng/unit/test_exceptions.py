@@ -1,11 +1,11 @@
 import pytest
 
-from sap_cloud_sdk.core.dpi_ng.consent.exceptions import (
+from sap_cloud_sdk.core.dpi_ng.exceptions import (
     AuthenticationError,
     AuthorizationError,
     ClientCreationError,
     ConflictError,
-    ConsentSDKError,
+    DPINGError,
     NotFoundError,
     ODataError,
     ValidationError,
@@ -14,29 +14,29 @@ from sap_cloud_sdk.core.dpi_ng.consent.exceptions import (
 
 class TestHierarchy:
     def test_client_creation_error_is_sdk_error(self):
-        assert issubclass(ClientCreationError, ConsentSDKError)
+        assert issubclass(ClientCreationError, DPINGError)
 
     def test_authentication_error_is_sdk_error(self):
-        assert issubclass(AuthenticationError, ConsentSDKError)
+        assert issubclass(AuthenticationError, DPINGError)
 
     def test_authorization_error_is_sdk_error(self):
-        assert issubclass(AuthorizationError, ConsentSDKError)
+        assert issubclass(AuthorizationError, DPINGError)
 
     def test_validation_error_is_sdk_error(self):
-        assert issubclass(ValidationError, ConsentSDKError)
+        assert issubclass(ValidationError, DPINGError)
 
     def test_not_found_error_is_sdk_error(self):
-        assert issubclass(NotFoundError, ConsentSDKError)
+        assert issubclass(NotFoundError, DPINGError)
 
     def test_conflict_error_is_sdk_error(self):
-        assert issubclass(ConflictError, ConsentSDKError)
+        assert issubclass(ConflictError, DPINGError)
 
     def test_odata_error_is_sdk_error(self):
-        assert issubclass(ODataError, ConsentSDKError)
+        assert issubclass(ODataError, DPINGError)
 
     def test_all_subclasses_are_exceptions(self):
         for cls in (
-            ConsentSDKError,
+            DPINGError,
             ClientCreationError,
             AuthenticationError,
             AuthorizationError,
@@ -48,30 +48,30 @@ class TestHierarchy:
             assert issubclass(cls, Exception)
 
 
-class TestConsentSDKError:
+class TestDPINGError:
     def test_message_stored(self):
-        exc = ConsentSDKError("something went wrong")
+        exc = DPINGError("something went wrong")
         assert str(exc) == "something went wrong"
 
     def test_odata_error_stored_when_provided(self):
         payload = {"code": "DPI-001", "message": "bad input"}
-        exc = ConsentSDKError("fail", odata_error=payload)
+        exc = DPINGError("fail", odata_error=payload)
         assert exc.odata_error == payload
 
     def test_odata_error_defaults_to_empty_dict(self):
-        exc = ConsentSDKError("fail")
+        exc = DPINGError("fail")
         assert exc.odata_error == {}
 
     def test_odata_error_none_becomes_empty_dict(self):
-        exc = ConsentSDKError("fail", odata_error=None)
+        exc = DPINGError("fail", odata_error=None)
         assert exc.odata_error == {}
 
     def test_raise_and_catch(self):
-        with pytest.raises(ConsentSDKError, match="something went wrong"):
-            raise ConsentSDKError("something went wrong")
+        with pytest.raises(DPINGError, match="something went wrong"):
+            raise DPINGError("something went wrong")
 
     def test_subclass_caught_as_sdk_error(self):
-        with pytest.raises(ConsentSDKError):
+        with pytest.raises(DPINGError):
             raise AuthenticationError("token rejected")
 
 
@@ -99,7 +99,7 @@ class TestODataError:
             raise ODataError("server error", status_code=500)
 
     def test_raise_and_catch_as_sdk_error(self):
-        with pytest.raises(ConsentSDKError):
+        with pytest.raises(DPINGError):
             raise ODataError("server error", status_code=500)
 
     def test_various_status_codes_stored(self):

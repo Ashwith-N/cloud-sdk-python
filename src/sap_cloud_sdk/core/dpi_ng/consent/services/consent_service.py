@@ -7,7 +7,7 @@ from typing import Any
 
 from sap_cloud_sdk.core.telemetry import Module, Operation, record_metrics
 
-from ..client import _ODataClient
+from ..client import _ConsentODataClient
 from ..dtos.consent import (
     CheckConsentExistsResult,
     CreateConsentRequest,
@@ -25,7 +25,7 @@ class ConsentService:
 
     def __init__(
         self,
-        client: _ODataClient,
+        client: _ConsentODataClient,
         *,
         _telemetry_source: Module | None = None,
     ) -> None:

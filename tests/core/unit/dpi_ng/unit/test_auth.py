@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from sap_cloud_sdk.core.dpi_ng.consent.auth import (
+from sap_cloud_sdk.core.dpi_ng.auth import (
     BearerTokenAuth,
     ClientCertificateAuth,
     ClientCredentialsAuth,
@@ -100,7 +100,7 @@ class TestOAuth2Flow:
         req = MagicMock()
         req.headers = {}
         with patch(
-            "sap_cloud_sdk.core.dpi_ng.consent.auth.requests.post",
+            "sap_cloud_sdk.core.dpi_ng.auth.requests.post",
             return_value=_mock_post_response(),
         ) as mock_post:
             flow(req)
@@ -111,7 +111,7 @@ class TestOAuth2Flow:
         req = MagicMock()
         req.headers = {}
         with patch(
-            "sap_cloud_sdk.core.dpi_ng.consent.auth.requests.post",
+            "sap_cloud_sdk.core.dpi_ng.auth.requests.post",
             return_value=_mock_post_response("my-access-token"),
         ):
             result = flow(req)
@@ -124,7 +124,7 @@ class TestOAuth2Flow:
         req2 = MagicMock()
         req2.headers = {}
         with patch(
-            "sap_cloud_sdk.core.dpi_ng.consent.auth.requests.post",
+            "sap_cloud_sdk.core.dpi_ng.auth.requests.post",
             return_value=_mock_post_response(),
         ) as mock_post:
             flow(req1)
@@ -138,7 +138,7 @@ class TestOAuth2Flow:
         req = MagicMock()
         req.headers = {}
         with patch(
-            "sap_cloud_sdk.core.dpi_ng.consent.auth.requests.post",
+            "sap_cloud_sdk.core.dpi_ng.auth.requests.post",
             return_value=_mock_post_response("new-token"),
         ) as mock_post:
             flow(req)
@@ -153,7 +153,7 @@ class TestOAuth2Flow:
         req = MagicMock()
         req.headers = {}
         with patch(
-            "sap_cloud_sdk.core.dpi_ng.consent.auth.requests.post",
+            "sap_cloud_sdk.core.dpi_ng.auth.requests.post",
             return_value=error_resp,
         ):
             with pytest.raises(requests.HTTPError):

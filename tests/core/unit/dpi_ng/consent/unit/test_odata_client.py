@@ -1,4 +1,4 @@
-"""Unit tests for client.py — _ODataClient._raise_for_status, call_action, context manager."""
+"""Unit tests for client.py — _ConsentODataClient._raise_for_status, call_action, context manager."""
 
 from __future__ import annotations
 
@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sap_cloud_sdk.core.dpi_ng.consent.auth import AuthProvider, ClientCertificateAuth
-from sap_cloud_sdk.core.dpi_ng.consent.client import _ODataClient
-from sap_cloud_sdk.core.dpi_ng.consent.config import ConsentSDKConfig
-from sap_cloud_sdk.core.dpi_ng.consent.exceptions import (
+from sap_cloud_sdk.core.dpi_ng.auth import AuthProvider, ClientCertificateAuth
+from sap_cloud_sdk.core.dpi_ng.consent.client import _ConsentODataClient
+from sap_cloud_sdk.core.dpi_ng.consent.config import ConsentConfig
+from sap_cloud_sdk.core.dpi_ng.exceptions import (
     AuthenticationError,
     AuthorizationError,
     ConflictError,
@@ -33,12 +33,12 @@ def _mock_response(status_code, json_body=None, text="", content=b"body"):
 
 def _make_config():
     auth = MagicMock(spec=AuthProvider)
-    return ConsentSDKConfig(base_url="https://consent.example.com", auth=auth)
+    return ConsentConfig(base_url="https://consent.example.com", auth=auth)
 
 
 def _make_config_with_tenant(tenant_id: str):
     auth = ClientCertificateAuth(cert_file="cert.pem", key_file="key.pem")
-    return ConsentSDKConfig(
+    return ConsentConfig(
         base_url="https://consent.example.com", auth=auth, tenant_id=tenant_id
     )
 
@@ -46,7 +46,7 @@ def _make_config_with_tenant(tenant_id: str):
 class TestRaiseForStatus:
     def test_200_does_not_raise(self):
         resp = _mock_response(200, json_body={}, text="ok", content=b"ok")
-        _ODataClient._raise_for_status(resp)
+        _ConsentODataClient._raise_for_status(resp)
 
     def test_401_raises_authentication_error(self):
         resp = _mock_response(
@@ -55,7 +55,7 @@ class TestRaiseForStatus:
             text="Unauthorized",
         )
         with pytest.raises(AuthenticationError, match="Unauthorized"):
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
 
     def test_403_raises_authorization_error(self):
         resp = _mock_response(
@@ -64,7 +64,7 @@ class TestRaiseForStatus:
             text="Forbidden",
         )
         with pytest.raises(AuthorizationError, match="Forbidden"):
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
 
     def test_404_raises_not_found_error(self):
         resp = _mock_response(
@@ -73,7 +73,7 @@ class TestRaiseForStatus:
             text="Not Found",
         )
         with pytest.raises(NotFoundError, match="Not Found"):
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
 
     def test_409_raises_conflict_error(self):
         resp = _mock_response(
@@ -82,7 +82,7 @@ class TestRaiseForStatus:
             text="Conflict",
         )
         with pytest.raises(ConflictError, match="Conflict"):
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
 
     def test_400_raises_validation_error(self):
         resp = _mock_response(
@@ -91,7 +91,7 @@ class TestRaiseForStatus:
             text="Bad Request",
         )
         with pytest.raises(ValidationError, match="Bad Request"):
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
 
     def test_422_raises_validation_error(self):
         resp = _mock_response(
@@ -100,7 +100,7 @@ class TestRaiseForStatus:
             text="Unprocessable",
         )
         with pytest.raises(ValidationError, match="Unprocessable"):
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
 
     def test_500_raises_odata_error_with_status_code(self):
         resp = _mock_response(
@@ -109,7 +109,7 @@ class TestRaiseForStatus:
             text="Server Error",
         )
         with pytest.raises(ODataError) as exc_info:
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
         assert exc_info.value.status_code == 500
 
     def test_odata_error_message_extracted_from_body(self):
@@ -119,7 +119,7 @@ class TestRaiseForStatus:
             text="raw text",
         )
         with pytest.raises(AuthenticationError, match="Token expired"):
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
 
     def test_details_appended_to_message(self):
         resp = _mock_response(
@@ -133,13 +133,13 @@ class TestRaiseForStatus:
             text="Validation failed",
         )
         with pytest.raises(ValidationError, match="name: too long"):
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
 
     def test_non_json_body_falls_back_to_resp_text(self):
         resp = _mock_response(403, text="plain text error", content=b"plain text error")
         resp.json.side_effect = ValueError("not json")
         with pytest.raises(AuthorizationError, match="plain text error"):
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
 
     def test_odata_error_stores_odata_error_dict(self):
         odata_payload = {"message": "Unauthorized", "code": "AUTH_001"}
@@ -149,12 +149,12 @@ class TestRaiseForStatus:
             text="Unauthorized",
         )
         with pytest.raises(AuthenticationError) as exc_info:
-            _ODataClient._raise_for_status(resp)
+            _ConsentODataClient._raise_for_status(resp)
         assert exc_info.value.odata_error == odata_payload
 
 
-@patch("sap_cloud_sdk.core.dpi_ng.consent.client.ODataService")
-@patch("sap_cloud_sdk.core.dpi_ng.consent.client.requests.Session")
+@patch("sap_cloud_sdk.core.dpi_ng.odata_client.ODataService")
+@patch("sap_cloud_sdk.core.dpi_ng.odata_client.requests.Session")
 class TestCallAction:
     def test_returns_parsed_json_on_200(self, mock_session_cls, mock_odata_svc_cls):
         mock_session = MagicMock()
@@ -170,7 +170,7 @@ class TestCallAction:
         mock_session.post.return_value = post_resp
 
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         result = client.call_action("consentServices", "myAction", body={"key": "val"})
 
         assert result == {"value": "ok"}
@@ -189,7 +189,7 @@ class TestCallAction:
         mock_session.post.return_value = post_resp
 
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         result = client.call_action("consentServices", "myAction")
 
         assert result is None
@@ -207,7 +207,7 @@ class TestCallAction:
         mock_session.post.return_value = post_resp
 
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         result = client.call_action("consentServices", "myAction")
 
         assert result is None
@@ -227,13 +227,13 @@ class TestCallAction:
         mock_session.post.return_value = post_resp
 
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         with pytest.raises(NotFoundError, match="Resource not found"):
             client.call_action("consentServices", "missingAction")
 
 
-@patch("sap_cloud_sdk.core.dpi_ng.consent.client.ODataService")
-@patch("sap_cloud_sdk.core.dpi_ng.consent.client.requests.Session")
+@patch("sap_cloud_sdk.core.dpi_ng.odata_client.ODataService")
+@patch("sap_cloud_sdk.core.dpi_ng.odata_client.requests.Session")
 class TestOrmMethods:
     def test_get_entity_classes_calls_factory_on_cache_miss(
         self, mock_session_cls, mock_odata_svc_cls
@@ -244,12 +244,9 @@ class TestOrmMethods:
         mock_entities = (MagicMock(),)
         mock_factory = MagicMock(return_value=mock_entities)
         config = _make_config()
-        client = _ODataClient(config)
-        with patch.dict(
-            "sap_cloud_sdk.core.dpi_ng.consent.client._ENTITY_FACTORIES",
-            {"testSvc": mock_factory},
-        ):
-            result = client.get_entity_classes("testSvc")
+        client = _ConsentODataClient(config)
+        client._factories["testSvc"] = mock_factory
+        result = client.get_entity_classes("testSvc")
         mock_factory.assert_called_once_with(mock_svc)
         assert result is mock_entities
 
@@ -260,13 +257,10 @@ class TestOrmMethods:
         mock_odata_svc_cls.return_value = MagicMock()
         mock_factory = MagicMock(return_value=(MagicMock(),))
         config = _make_config()
-        client = _ODataClient(config)
-        with patch.dict(
-            "sap_cloud_sdk.core.dpi_ng.consent.client._ENTITY_FACTORIES",
-            {"testSvc": mock_factory},
-        ):
-            client.get_entity_classes("testSvc")
-            client.get_entity_classes("testSvc")
+        client = _ConsentODataClient(config)
+        client._factories["testSvc"] = mock_factory
+        client.get_entity_classes("testSvc")
+        client.get_entity_classes("testSvc")
         mock_factory.assert_called_once()
 
     def test_query_delegates_to_odata_service(
@@ -277,7 +271,7 @@ class TestOrmMethods:
         mock_odata_svc_cls.return_value = mock_svc
         entity_cls = MagicMock()
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         result = client.query("consentServices", entity_cls)
         mock_svc.query.assert_called_once_with(entity_cls)
         assert result is mock_svc.query.return_value
@@ -292,7 +286,7 @@ class TestOrmMethods:
         entity.__odata__.persisted = False
         entity.__odata_service__ = MagicMock()
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         client.save(entity)
         entity.__odata_service__.save.assert_called_once_with(entity)
 
@@ -307,7 +301,7 @@ class TestOrmMethods:
         entity.__odata__.persisted = True
         entity.__odata_service__ = MagicMock()
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         client.save(entity)
         mock_session.headers.__setitem__.assert_any_call("If-Match", "*")
 
@@ -320,7 +314,7 @@ class TestOrmMethods:
         entity = MagicMock()
         entity.__odata_service__ = MagicMock()
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         client.delete_entity(entity)
         entity.__odata_service__.delete.assert_called_once_with(entity)
         mock_session.headers.__setitem__.assert_any_call("If-Match", "*")
@@ -334,7 +328,7 @@ class TestOrmMethods:
         entity = MagicMock()
         entity.__odata__ = MagicMock()
         type(entity).my_field = prop
-        _ODataClient._apply_body(entity, {"my_field": "new-value"})
+        _ConsentODataClient._apply_body(entity, {"my_field": "new-value"})
         assert entity.my_field == "new-value"
         entity.__odata__.set_property_dirty.assert_called_once_with(prop)
 
@@ -345,18 +339,18 @@ class TestOrmMethods:
         mock_odata_svc_cls.return_value = MagicMock()
         entity = MagicMock(spec=[])
         entity.__odata__ = MagicMock()
-        _ODataClient._apply_body(entity, {"nonexistent_field": "x"})
+        _ConsentODataClient._apply_body(entity, {"nonexistent_field": "x"})
         entity.__odata__.set_property_dirty.assert_not_called()
 
 
-@patch("sap_cloud_sdk.core.dpi_ng.consent.client.requests.Session")
+@patch("sap_cloud_sdk.core.dpi_ng.odata_client.requests.Session")
 class TestTenantIdHeader:
     def test_x_tenant_id_header_set_when_tenant_id_provided(self, mock_session_cls):
         mock_session = MagicMock()
         mock_session_cls.return_value = mock_session
 
         config = _make_config_with_tenant("my-tenant-id")
-        _ODataClient(config)
+        _ConsentODataClient(config)
 
         header_updates = [
             c.args[0] if c.args else c.kwargs.get("arg", {})
@@ -372,7 +366,7 @@ class TestTenantIdHeader:
         mock_session_cls.return_value = mock_session
 
         config = _make_config()
-        _ODataClient(config)
+        _ConsentODataClient(config)
 
         header_updates = [
             c.args[0] if c.args else {}
@@ -381,20 +375,20 @@ class TestTenantIdHeader:
         assert all("x-tenant-id" not in h for h in header_updates)
 
 
-@patch("sap_cloud_sdk.core.dpi_ng.consent.client.ODataService")
-@patch("sap_cloud_sdk.core.dpi_ng.consent.client.requests.Session")
+@patch("sap_cloud_sdk.core.dpi_ng.odata_client.ODataService")
+@patch("sap_cloud_sdk.core.dpi_ng.odata_client.requests.Session")
 class TestContextManager:
     def test_enter_returns_self(self, mock_session_cls, mock_odata_svc_cls):
         mock_session_cls.return_value = MagicMock()
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         assert client.__enter__() is client
 
     def test_exit_calls_session_close(self, mock_session_cls, mock_odata_svc_cls):
         mock_session = MagicMock()
         mock_session_cls.return_value = mock_session
         config = _make_config()
-        client = _ODataClient(config)
+        client = _ConsentODataClient(config)
         client.__exit__(None, None, None)
         mock_session.close.assert_called_once()
 
@@ -402,6 +396,6 @@ class TestContextManager:
         mock_session = MagicMock()
         mock_session_cls.return_value = mock_session
         config = _make_config()
-        with _ODataClient(config) as client:
-            assert isinstance(client, _ODataClient)
+        with _ConsentODataClient(config) as client:
+            assert isinstance(client, _ConsentODataClient)
         mock_session.close.assert_called_once()

@@ -47,14 +47,18 @@ def auth() -> BearerTokenAuth:
 
 class TestCreateClient:
     def test_with_config(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             _setup_mock(Mock)
             config = ConsentConfig(base_url="https://example.com", auth=auth)
             client = create_client(config=config)
             assert isinstance(client, ConsentClient)
 
     def test_with_kwargs(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             _setup_mock(Mock)
             client = create_client(base_url="https://example.com", auth=auth)
             assert isinstance(client, ConsentClient)
@@ -76,7 +80,9 @@ class TestCreateClient:
             create_client()
 
     def test_returns_consent_client_instance(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             _setup_mock(Mock)
             config = ConsentConfig(base_url="https://example.com", auth=auth)
             result = create_client(config=config)
@@ -85,7 +91,9 @@ class TestCreateClient:
 
 class TestConsentClientAttributes:
     def test_service_types(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             _setup_mock(Mock)
             config = ConsentConfig(base_url="https://example.com", auth=auth)
             client = ConsentClient(config)
@@ -96,14 +104,18 @@ class TestConsentClientAttributes:
             assert isinstance(client.configuration, ConsentConfigurationService)
 
     def test_odata_client_instantiated(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             _setup_mock(Mock)
             config = ConsentConfig(base_url="https://example.com", auth=auth)
             ConsentClient(config)
             Mock.assert_called_once_with(config)
 
     def test_all_five_services_present(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             _setup_mock(Mock)
             config = ConsentConfig(base_url="https://example.com", auth=auth)
             client = ConsentClient(config)
@@ -119,7 +131,9 @@ class TestConsentClientAttributes:
 
 class TestConsentClientLifecycle:
     def test_context_manager_closes(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             mock_instance = MagicMock()
             Mock.return_value = mock_instance
             mock_instance.get_entity_classes.side_effect = _entity_side_effect
@@ -129,7 +143,9 @@ class TestConsentClientLifecycle:
             mock_instance.close.assert_called_once()
 
     def test_close_delegates_to_odata(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             mock_instance = MagicMock()
             Mock.return_value = mock_instance
             mock_instance.get_entity_classes.side_effect = _entity_side_effect
@@ -139,7 +155,9 @@ class TestConsentClientLifecycle:
             mock_instance.close.assert_called_once()
 
     def test_context_manager_returns_client(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             mock_instance = MagicMock()
             Mock.return_value = mock_instance
             mock_instance.get_entity_classes.side_effect = _entity_side_effect
@@ -148,7 +166,9 @@ class TestConsentClientLifecycle:
                 assert isinstance(client, ConsentClient)
 
     def test_close_called_even_on_exception(self, auth: BearerTokenAuth) -> None:
-        with patch("sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient") as Mock:
+        with patch(
+            "sap_cloud_sdk.core.dpi_ng.consent.client._ConsentODataClient"
+        ) as Mock:
             mock_instance = MagicMock()
             Mock.return_value = mock_instance
             mock_instance.get_entity_classes.side_effect = _entity_side_effect

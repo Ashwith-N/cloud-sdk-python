@@ -8,7 +8,12 @@ Shared building blocks for all DPI NG capabilities:
 - :mod:`sap_cloud_sdk.core.dpi_ng.odata_client`  — BaseODataClient
 """
 
-from .auth import AuthProvider, BearerTokenAuth, ClientCertificateAuth, ClientCredentialsAuth
+from .auth import (
+    AuthProvider,
+    BearerTokenAuth,
+    ClientCertificateAuth,
+    ClientCredentialsAuth,
+)
 from .config import BaseCapabilityConfig
 from .exceptions import (
     AuthenticationError,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -11,9 +12,14 @@ from sap_cloud_sdk.core.dpi_ng.config import BaseCapabilityConfig
 from sap_cloud_sdk.core.dpi_ng.odata_client import BaseODataClient
 
 
+@dataclass
+class _TestConfig(BaseCapabilityConfig):
+    service_path: str = "/test/odata/v4"
+
+
 def _make_config():
     auth = MagicMock(spec=AuthProvider)
-    return BaseCapabilityConfig(base_url="https://example.com", auth=auth)
+    return _TestConfig(base_url="https://example.com", auth=auth)
 
 
 class _ConcreteClient(BaseODataClient):

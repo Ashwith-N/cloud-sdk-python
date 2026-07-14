@@ -2,6 +2,7 @@
 
 import logging
 import re
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from .auth import AuthProvider, ClientCertificateAuth
@@ -12,11 +13,11 @@ _URL_PATTERN = re.compile(r"^https?://[^\s/$.?#].[^\s]*$")
 
 
 @dataclass
-class BaseCapabilityConfig:
+class BaseCapabilityConfig(ABC):
     """Base configuration for a DPI NG capability client.
 
-    Subclasses add a ``service_path`` (and any other capability-specific fields)
-    on top of these shared fields.
+    Subclasses override ``service_path`` with a capability-specific default
+    and may add extra fields on top of these shared fields.
 
     Args:
         base_url: URL of the DPI external service router
@@ -25,6 +26,8 @@ class BaseCapabilityConfig:
                   service instance.
         auth: Authentication strategy - one of BearerTokenAuth, ClientCredentialsAuth,
               or ClientCertificateAuth.
+        service_path: Base OData path used to build service URLs.  Subclasses
+                      override this field with a capability-specific default.
         timeout: HTTP request timeout in seconds (default 30).
         verify_ssl: Verify TLS certificates - set False only in local dev.
                     Overridden by ``ClientCertificateAuth`` when a custom ``ca_file`` is provided.
@@ -41,6 +44,11 @@ class BaseCapabilityConfig:
     timeout: float = 30.0
     verify_ssl: bool = True
     tenant_id: str | None = field(default=None)
+
+    @property
+    @abstractmethod
+    def service_path(self) -> str:
+        """Base OData path used to build service URLs."""
 
     def __post_init__(self) -> None:
         """Validate config after dataclass construction.

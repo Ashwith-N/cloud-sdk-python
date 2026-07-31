@@ -279,8 +279,8 @@ class TestHttpTransport:
         transport._tmp_key_file = None
 
         cert_path = transport._resolve_cert()
-        assert isinstance(cert_path, str)
 
+        assert isinstance(cert_path, str)
         assert Path(cert_path).exists()
         assert "BEGIN RSA PRIVATE KEY" in Path(cert_path).read_text(encoding="utf-8")
         transport._session = MagicMock()
@@ -329,8 +329,8 @@ class TestHttpTransport:
         transport._tmp_key_file = None
 
         cert_path = transport._resolve_cert()
-        assert isinstance(cert_path, str)
 
+        assert isinstance(cert_path, str)
         assert Path(cert_path).exists()
         assert "BEGIN CERTIFICATE" in Path(cert_path).read_text(encoding="utf-8")
         transport._session = MagicMock()

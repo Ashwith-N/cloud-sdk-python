@@ -176,6 +176,54 @@ GenAIOperation.INVOKE_AGENT
 
 ---
 
+## Logging
+
+`auto_instrument()` sets up OTel logs alongside traces and metrics. It installs a handler on the root stdlib logger so all existing `logging.getLogger(...)` calls in your app automatically ship log records to the OTel backend with the same resource attributes (service name, region, subaccount, etc.).
+
+No changes to your logging code are needed:
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.info("Destination fetched")
+logger.warning("Retrying request, attempt %d", attempt)
+logger.error("Failed to connect", exc_info=True)
+```
+
+### Structured fields
+
+Use `extra={}` to attach structured attributes to a log record:
+
+```python
+logger.info("Request completed", extra={"tenant_id": tid, "duration_ms": 120})
+```
+
+### Log level filtering
+
+By default all levels (`DEBUG` and above) flow through OTel. To restrict what gets exported, set the level on the root logger or any specific logger:
+
+```python
+# Only WARNING and above to OTel
+logging.getLogger().setLevel(logging.WARNING)
+
+# Or scope it to your app's logger tree
+logging.getLogger("my_app").setLevel(logging.INFO)
+```
+
+### Correlation with traces
+
+OTel logs emitted inside an active span are automatically correlated — the `trace_id` and `span_id` are injected into the log record. No extra work needed.
+
+### Third-party logging libraries
+
+The OTel handler is installed on the root stdlib `logging` logger. Any library that propagates to stdlib works automatically.
+
+Libraries that bypass stdlib entirely need a custom sink that forwards records to `logging.getLogger(...).log(...)`. The OTel handler then picks them up from there.
+
+---
+
 ## Adding attributes
 
 ### To the current span
@@ -232,6 +280,7 @@ Propagation is scoped: once the parent span exits, its attributes stop propagati
 ## Complete example
 
 ```python
+import logging
 from sap_cloud_sdk.core.telemetry import (
     auto_instrument,
     invoke_agent_span,
@@ -244,9 +293,12 @@ auto_instrument()
 
 from litellm import completion
 
+logger = logging.getLogger(__name__)
 
 async def handle_request(query: str, user_id: str):
     set_tenant_id("bh7sjh...")
+
+    logger.info("Handling request", extra={"user_id": user_id})
 
     # Parent span carries business context for the whole agent turn.
     # Autoinstrumentation creates the child LLM span automatically.
@@ -255,6 +307,7 @@ async def handle_request(query: str, user_id: str):
     ):
         documents = await retrieve_knowledge_base(query)
         add_span_attribute("documents.retrieved", len(documents))
+        logger.debug("Retrieved %d documents", len(documents))
 
         response = completion(
             model="gpt-4",
@@ -345,7 +398,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="https://otel-collector.example.com"
 
 ### Transport protocol
 
-Both traces and metrics use gRPC by default. Switch to HTTP/protobuf by setting:
+Traces, metrics, and logs all use gRPC by default. Switch to HTTP/protobuf by setting:
 
 ```bash
 export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
@@ -373,7 +426,64 @@ export APPFND_CONHOS_SYSTEM_ROLE="S4HC"
 export SAP_SOLUTION_AREA="AFND"
 ```
 
-### ORD document ID
+---
+
+## Instrumenting SDK modules with `record_metrics`
+
+The `record_metrics` decorator records request and error counters for any SDK module operation. It is the standard way to add usage telemetry to a client method.
+
+```python
+from sap_cloud_sdk.core.telemetry import record_metrics
+
+class MyClient:
+    @record_metrics("my_module", "my_operation")
+    def my_method(self):
+        ...
+```
+
+Each call to the decorated method increments `sap.cloud_sdk.capability.requests`. On exception it increments `sap.cloud_sdk.capability.errors` and re-raises. Metrics are emitted only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set — no-op otherwise.
+
+### Using the built-in enums
+
+For modules that live inside this package, use the `Module` and `Operation` enums:
+
+```python
+from sap_cloud_sdk.core.telemetry import record_metrics, Module, Operation
+
+class DestinationClient:
+    @record_metrics(Module.DESTINATION, Operation.DESTINATION_GET_DESTINATION)
+    def get_destination(self, name: str):
+        ...
+```
+
+### Using plain strings (external packages)
+
+External packages that depend on `sap-cloud-sdk` can pass plain strings directly without contributing to the enums in this repo:
+
+```python
+from sap_cloud_sdk.core.telemetry import record_metrics
+
+class MyExternalClient:
+    @record_metrics("my_module", "my_operation")
+    def my_method(self):
+        ...
+```
+
+The `Module` enum values are still the canonical form for OSS modules. Plain strings are the extension point for packages that have their own release lifecycle.
+
+### Source attribution
+
+When one SDK module creates a client from another internally, set `_telemetry_source` so the metric reflects the originating module:
+
+```python
+auditlog_client = AuditLogClient(_telemetry_source=Module.OBJECTSTORE)
+```
+
+The decorator reads `_telemetry_source` from `self` (or from `__init__` kwargs) and passes it as the `source` attribute on the metric.
+
+---
+
+## ORD document ID
 
 ```bash
 export ORD_DOCUMENT_ID="sap.foo:ord-doc:v1"

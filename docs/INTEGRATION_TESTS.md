@@ -204,7 +204,7 @@ uv run pytest tests/core/integration/auditlog -v
 uv run pytest tests/core/integration/data_anonymization -v
 uv run pytest tests/destination/integration/ -v
 uv run pytest tests/dms/integration/ -v
-uv run pytest tests/core/integration/dpi_ng/consent/ -v
+uv run pytest tests/dpi_ng/integration/consent/ -v
 uv run pytest tests/objectstore/integration/ -v
 ```
 

@@ -81,7 +81,7 @@ Each module has comprehensive usage guides:
 - [Telemetry](src/sap_cloud_sdk/core/telemetry/user-guide.md)
 - [Print](src/sap_cloud_sdk/print/user-guide.md)
 - [Data Anonymization](src/sap_cloud_sdk/core/data_anonymization/user-guide.md)
-- [Data Privacy Integration](src/sap_cloud_sdk/core/dpi_ng/consent/user-guide.md)
+- [Data Privacy Integration](src/sap_cloud_sdk/dpi_ng/consent/user-guide.md)
 
 ## Support, Feedback, Contributing
 

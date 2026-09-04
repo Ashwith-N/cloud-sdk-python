@@ -292,7 +292,7 @@ class BaseODataClient(ABC):
             ValidationError: On HTTP 400 or 422.
             ODataError: On any other 4xx or 5xx response.
         """
-        status_code: int = resp.status_code  # ty: ignore[invalid-assignment]
+        status_code: int = resp.status_code
         if status_code < 400:
             return
         try:

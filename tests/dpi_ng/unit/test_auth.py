@@ -115,7 +115,7 @@ class TestOAuth2Flow:
             return_value=_mock_post_response("my-access-token"),
         ):
             result = flow(req)
-        assert result.headers["Authorization"] == "Bearer my-access-token"  # ty: ignore[not-subscriptable]
+        assert result.headers["Authorization"] == "Bearer my-access-token"
 
     def test_second_call_reuses_cached_token(self):
         flow = _OAuth2Flow("https://token.url", "cid", "secret")
